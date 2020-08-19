@@ -1,8 +1,12 @@
 ---
 # defaults file for ansible-forescout
 
+#redhat
+redhat_forescout_agent_url: ""
+redhat_forescout_agent_path: "/usr/lib/forescout/bin"
+
 #windows
-windows_forescout_agent_path: "C:\\Program Files (x86)\\BigFix Enterprise\\BES Client" # default windows install directory
+windows_forescout_agent_path: "C:\\Program Files\\ForeScout SecureConnector" # default windows install directory
 windows_forescout_agent_url: "" # default windows agent artifactory url
 windows_forescout_product_id: "" # win_package using a url requires a product_id
 windows_forescout_agent_mode: "" # default windows forescout agent mode

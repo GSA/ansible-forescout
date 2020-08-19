@@ -1,0 +1,64 @@
+---
+- name: checking for agent install
+  stat:
+    path: '{{ redhat_forescout_agent_path }}/ForeScoutSecureConnector.bin'
+  register: agent
+
+- debug:
+    msg: "forescout agent not found (installing)"
+  when: not agent.stat.exists
+
+- debug:
+    msg: "forescout agent found (skipping install)"
+  when: agent.stat.exists
+
+- name: copying sc.tar.tbz to /tmp for install
+  get_url:
+    url: '{{ redhat_forescout_agent_url }}'
+    dest: /tmp/sc.tar.tbz
+    validate_certs: no
+    mode: 0755
+  when: not agent.stat.exists
+
+- name: create /usr/lib/forescout directory
+  file:
+    path: /usr/lib/forescout
+    recurse: yes
+    state: directory
+    mode: 0755
+  when: not agent.stat.exists
+
+- name: extract sc.tar.tbz to /tmp for install
+  unarchive:
+    src: /tmp/sc.tar.tbz
+    dest: /tmp/secure_connector
+    remote_src: yes
+    mode: 0755
+  when: not agent.stat.exists
+
+- name: change shell permissions for install.sh
+  file:
+    path: /tmp/secure_connector/
+    state: directory
+    recurse: yes
+    mode: a+x
+  when: not agent.stat.exists
+
+- name: execute install.sh for forescout
+  shell:
+    cmd: ./install.sh >> /tmp/forescout_install.txt
+    chdir: /tmp/secure_connector/
+  when: not agent.stat.exists
+
+- name: cleanup /tmp/secure_connector/ directory
+  file:
+    path: /tmp/secure_connector/
+    state: absent
+    mode: 0755
+  when: not agent.stat.exists
+
+- name: verify forescout started
+  shell:
+    cmd: ./start_sc_agent.sh
+    chdir: '{{ redhat_forescout_agent_path }}'
+  when: agent.stat.exists

@@ -1,0 +1,43 @@
+---
+- name: checking for agent install
+  win_service:
+    name: SecureConnector
+  register: agent
+
+- debug:
+    msg: "forescout agent not found (installing)"
+  when: not agent.exists
+
+- debug:
+    msg: "forescout agent found (skipping install)"
+  when: agent.exists
+
+- name: create {{ windows_agent_log }} directory
+  win_file:
+    path: '{{ windows_agent_log }}'
+    recurse: yes
+    state: directory
+  when: not agent.exists
+
+- name: create {{ windows_forescout_agent_path }} directory
+  win_file:
+    path: '{{ windows_forescout_agent_path }}'
+    recurse: yes
+    state: directory
+  when: not agent.exists
+
+- name: install forescout agent (windows)
+  win_package:
+    path: '{{ windows_forescout_agent_url }}'
+    log_path: '{{ windows_agent_log }}\forescout_log.txt'
+    product_id: '{{ windows_forescout_product_id }}'
+    state: present
+    arguments: MODE={{ windows_forescout_agent_mode }}
+  when: not agent.exists
+
+- name: verify forescout started
+  win_service:
+    name: besclient
+    enabled: yes
+    state: started
+    start_mode: auto

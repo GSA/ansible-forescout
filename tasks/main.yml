@@ -1,50 +1,8 @@
 ---
-- name: checking for agent install
-  win_service:
-    name: besclient
-  register: agent
+- name: RedHat
+  include: redhat.yml
+  when: ansible_os_family == 'RedHat'
 
-- debug:
-    msg: "bigfix agent not found (installing)"
-  when: not agent.exists
-
-- debug:
-    msg: "bigfix agent found (skipping install)"
-  when: agent.exists
-
-- name: create {{ windows_agent_log }} directory
-  win_file:
-    path: '{{ windows_agent_log }}'
-    recurse: yes
-    state: directory
-  when: not agent.exists
-
-- name: create {{ windows_bigfix_agent_path }} directory
-  win_file:
-    path: '{{ windows_bigfix_agent_path }}'
-    recurse: yes
-    state: directory
-  when: not agent.exists
-
-- name: copy actionsite.afxm to {{ windows_bigfix_agent_path }} directory
-  win_get_url:
-    url: '{{ bigfix_actionsite_url }}'
-    dest: '{{ windows_bigfix_agent_path }}\ActionSite.afxm'
-    timeout: 600
-  when: not agent.exists
-
-- name: install bigfix agent (windows)
-  win_package:
-    path: '{{ windows_bigfix_agent_url }}'
-    log_path: '{{ windows_agent_log }}\bigfix_log.txt'
-    product_id: '{{ windows_bigfix_product_id }}'
-    state: present
-    arguments: /qn
-  when: not agent.exists
-
-- name: verify bigfix started
-  win_service:
-    name: besclient
-    enabled: yes
-    state: started
-    start_mode: auto
+- name: Windows
+  include: windows.yml
+  when: ansible_os_family == 'Windows'
