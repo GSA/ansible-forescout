@@ -37,7 +37,7 @@
 
 - name: verify forescout started
   win_service:
-    name: besclient
+    name: SecureConnector
     enabled: yes
     state: started
     start_mode: auto
